@@ -1,0 +1,363 @@
+/*/*==============================================================*/
+/* DBMS name:      Microsoft SQL Server 2017                    */
+/* Created on:     5/13/2026 11:50:11 PM                        */
+/*==============================================================*/
+
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('CERTIFICATES') and o.name = 'FK_CERTIFIC_RESULTS_I_ENROLLME')
+alter table CERTIFICATES
+   drop constraint FK_CERTIFIC_RESULTS_I_ENROLLME
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('ENROLLMENTS') and o.name = 'FK_ENROLLME_RECEIVES_PROGRAM')
+alter table ENROLLMENTS
+   drop constraint FK_ENROLLME_RECEIVES_PROGRAM
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('ENROLLMENTS') and o.name = 'FK_ENROLLME_REGISTERS_STUDENT')
+alter table ENROLLMENTS
+   drop constraint FK_ENROLLME_REGISTERS_STUDENT
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('ENROLLMENTS') and o.name = 'FK_ENROLLME_RESULTS_I_CERTIFIC')
+alter table ENROLLMENTS
+   drop constraint FK_ENROLLME_RESULTS_I_CERTIFIC
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('PROGRAM') and o.name = 'FK_PROGRAM_CONTAINS_CATEGORY')
+alter table PROGRAM
+   drop constraint FK_PROGRAM_CONTAINS_CATEGORY
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('PROGRAM') and o.name = 'FK_PROGRAM_TECHES_INSTRUCT')
+alter table PROGRAM
+   drop constraint FK_PROGRAM_TECHES_INSTRUCT
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('UNITS') and o.name = 'FK_UNITS_DIVIDES_I_PROGRAM')
+alter table UNITS
+   drop constraint FK_UNITS_DIVIDES_I_PROGRAM
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('CATEGORY')
+            and   type = 'U')
+   drop table CATEGORY
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('CERTIFICATES')
+            and   name  = 'RESULTS_IN2_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index CERTIFICATES.RESULTS_IN2_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('CERTIFICATES')
+            and   type = 'U')
+   drop table CERTIFICATES
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('ENROLLMENTS')
+            and   name  = 'RESULTS_IN_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index ENROLLMENTS.RESULTS_IN_FK
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('ENROLLMENTS')
+            and   name  = 'RECEIVES_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index ENROLLMENTS.RECEIVES_FK
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('ENROLLMENTS')
+            and   name  = 'REGISTERS_FOR_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index ENROLLMENTS.REGISTERS_FOR_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('ENROLLMENTS')
+            and   type = 'U')
+   drop table ENROLLMENTS
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('INSTRUCTORS')
+            and   type = 'U')
+   drop table INSTRUCTORS
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('PROGRAM')
+            and   name  = 'TECHES_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index PROGRAM.TECHES_FK
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('PROGRAM')
+            and   name  = 'CONTAINS_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index PROGRAM.CONTAINS_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('PROGRAM')
+            and   type = 'U')
+   drop table PROGRAM
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('STUDENT')
+            and   type = 'U')
+   drop table STUDENT
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('UNITS')
+            and   name  = 'DIVIDES_INTO_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index UNITS.DIVIDES_INTO_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('UNITS')
+            and   type = 'U')
+   drop table UNITS
+go
+
+
+
+/*==============================================================*/
+/* Table: CATEGORY                                              */
+/*==============================================================*/
+create table CATEGORY (
+   CATEGORY_ID          int                  identity (1,1),
+   NAME                 varchar(150)         null,
+   DESCRIPTION_         text                 null,
+   constraint PK_CATEGORY primary key (CATEGORY_ID)
+)
+go
+
+/*==============================================================*/
+/* Table: CERTIFICATES                                          */
+/*==============================================================*/
+create table CERTIFICATES (
+   CERTIFICATE_ID       int                  identity (1,1),
+   ENROLLMENT_ID        int                  not null,
+   VERIFICATION_CODE    varchar(100)         not null,
+   ISSUED_AT            timestamp            not null,
+   constraint PK_CERTIFICATES primary key (CERTIFICATE_ID),
+   constraint UQ_CERT_ENROLL UNIQUE (ENROLLMENT_ID)
+)
+go
+
+/*==============================================================*/
+/* Index: RESULTS_IN2_FK                                        */
+/*==============================================================*/
+
+
+
+
+create nonclustered index RESULTS_IN2_FK on CERTIFICATES (ENROLLMENT_ID ASC)
+go
+
+/*==============================================================*/
+/* Table: ENROLLMENTS                                           */
+/*==============================================================*/
+create table ENROLLMENTS (
+   ENROLLED_AT          timestamp            not null,
+   UNITS_COMPLETED      int                  not null,
+   ENROLLMENT_ID        int                  identity (1,1),
+   STUDENT_ID           int                  not null,
+   PROGRAM_ID           int                  not null,
+   constraint PK_ENROLLMENTS primary key (ENROLLMENT_ID)
+)
+go
+
+/*==============================================================*/
+/* Index: REGISTERS_FOR_FK                                      */
+/*==============================================================*/
+
+
+
+
+create nonclustered index REGISTERS_FOR_FK on ENROLLMENTS (STUDENT_ID ASC)
+go
+
+/*==============================================================*/
+/* Index: RECEIVES_FK                                           */
+/*==============================================================*/
+
+
+
+
+create nonclustered index RECEIVES_FK on ENROLLMENTS (PROGRAM_ID ASC)
+go
+
+/*==============================================================*/
+/* Index: RESULTS_IN_FK                                         */
+/*==============================================================*/
+
+
+
+
+
+
+/*==============================================================*/
+/* Table: INSTRUCTORS                                           */
+/*==============================================================*/
+create table INSTRUCTORS (
+   INSTRUCTOR_ID        int                  identity (1,1),
+   INS_FIRST_NAME       varchar(150)         not null,
+   INS_LAST_NAME        varchar(150)         not null,
+   INS_EMAIL            varchar(150)         not null,
+   BIO                  text                 null,
+   INS_JOINED_AT        timestamp            null,
+   constraint PK_INSTRUCTORS primary key (INSTRUCTOR_ID)
+)
+go
+
+/*==============================================================*/
+/* Table: PROGRAM                                               */
+/*==============================================================*/
+create table PROGRAM (
+   PROGRAM_ID           int                  identity (1,1),
+   INSTRUCTOR_ID        int                  not null,
+   CATEGORY_ID          int                  not null,
+   TITLE                varchar(200)         not null,
+   DIFFICULTY           varchar(20)          not null,
+   FEE                  decimal(8,2)         not null,
+   IS_ACTIVE            smallint             not null,
+   CREATED_AT           timestamp            null,
+   constraint PK_PROGRAM primary key (PROGRAM_ID)
+)
+go
+
+/*==============================================================*/
+/* Index: CONTAINS_FK                                           */
+/*==============================================================*/
+
+
+
+
+create nonclustered index CONTAINS_FK on PROGRAM (CATEGORY_ID ASC)
+go
+
+/*==============================================================*/
+/* Index: TECHES_FK                                             */
+/*==============================================================*/
+
+
+
+
+create nonclustered index TECHES_FK on PROGRAM (INSTRUCTOR_ID ASC)
+go
+
+/*==============================================================*/
+/* Table: STUDENT                                               */
+/*==============================================================*/
+create table STUDENT (
+   STUDENT_ID           int                 identity (1,1),
+   ST_FIRST_NAME        varchar(150)         not null,
+   ST_EMAIL             varchar(150)         not null,
+   COUNTRY              varchar(50)          null,
+   ST_JOINED_AT         timestamp            null,
+   ST_LAST_NAME         varchar(150)         null,
+   constraint PK_STUDENT primary key (STUDENT_ID)
+)
+go
+
+/*==============================================================*/
+/* Table: UNITS                                                 */
+/*==============================================================*/
+create table UNITS (
+   PROGRAM_ID           int                  not null,
+   SEQUENCE_NO          int                  not null,
+   UNIT_TITLE           varchar(200)         not null,
+   DURATION_MINS        int                  not null,
+   constraint PK_UNITS primary key (PROGRAM_ID, SEQUENCE_NO)
+)
+go
+
+/*==============================================================*/
+/* Index: DIVIDES_INTO_FK                                       */
+/*==============================================================*/
+
+
+
+
+create nonclustered index DIVIDES_INTO_FK on UNITS (PROGRAM_ID ASC)
+go
+
+alter table CERTIFICATES
+   add constraint FK_CERTIFIC_RESULTS_I_ENROLLME foreign key (ENROLLMENT_ID)
+      references ENROLLMENTS (ENROLLMENT_ID)
+go
+
+alter table ENROLLMENTS
+   add constraint FK_ENROLLME_RECEIVES_PROGRAM foreign key (PROGRAM_ID)
+      references PROGRAM (PROGRAM_ID)
+go
+
+alter table ENROLLMENTS
+   add constraint FK_ENROLLME_REGISTERS_STUDENT foreign key (STUDENT_ID)
+      references STUDENT (STUDENT_ID)
+go
+
+
+
+alter table PROGRAM
+   add constraint FK_PROGRAM_CONTAINS_CATEGORY foreign key (CATEGORY_ID)
+      references CATEGORY (CATEGORY_ID)
+go
+
+alter table PROGRAM
+   add constraint FK_PROGRAM_TECHES_INSTRUCT foreign key (INSTRUCTOR_ID)
+      references INSTRUCTORS (INSTRUCTOR_ID)
+go
+
+alter table UNITS
+   add constraint FK_UNITS_DIVIDES_I_PROGRAM foreign key (PROGRAM_ID)
+      references PROGRAM (PROGRAM_ID)
+go
+*/

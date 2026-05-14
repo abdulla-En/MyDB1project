@@ -1,0 +1,161 @@
+/*
+                               -- used command --
+DELETE FROM STUDENT
+DBCC CHECKIDENT ('INSTRUCTORS', RESEED, 0)
+*/
+
+/* 
+                              -- schema updated --
+ALTER TABLE INSTRUCTORS
+DROP COLUMN INS_JOINED_AT
+
+ALTER TABLE INSTRUCTORS
+ADD INS_JOINED_AT DATETIME2 DEFAULT GETDATE()
+
+ALTER TABLE Student
+DROP COLUMN ST_JOINED_AT
+
+ALTER TABLE Student
+ADD ST_JOINED_AT DATETIME2 DEFAULT GETDATE()
+
+Alter Table CertificateS
+Drop column ISSUED_AT
+
+Alter Table CertificateS
+ADD  ISSUED_AT DATETIME2 DEFAULT GETDATE()
+
+Alter Table PROGRAM
+Drop column CREATED_AT
+
+Alter Table PROGRAM
+ADD  CREATED_AT DATETIME2 DEFAULT GETDATE()
+
+Alter Table Enrollments
+Drop column enrolled_AT
+
+Alter Table Enrollments
+ADD  ENROLLED_AT DATETIME2 DEFAULT GETDATE()
+
+alter table program 
+drop column IS_Active
+
+ALTER TABLE program
+ADD IS_Active BIT DEFAULT 1
+
+
+*/
+
+
+
+
+
+/* data entry */
+/*
+INSERT INTO CATEGORY (NAME) VALUES 
+('Software Engineering'),
+('Cyber Security'),
+('CS'),
+('IT'),
+('DS');
+
+INSERT INTO INSTRUCTORS (INS_FIRST_NAME, INS_LAST_NAME, INS_EMAIL) VALUES 
+('Dr. Amin', 'allam', 'amin.allam@fcai.com'),
+('Dr. Sara', 'Nabil', 'sara.nabil@fcai.com'),
+('Dr. Yahya', 'Omar', 'yahya.omar@fcai.com');
+
+INSERT INTO STUDENT (ST_FIRST_NAME, ST_LAST_NAME, ST_EMAIL, ST_JOINED_AT) VALUES 
+('Hady', 'ahmed', 'hady@fcai.com', GETDATE()),
+('Ali', 'ahmed', 'ali@fcai.com', GETDATE()),
+('Hoda', 'mohamed', 'hoda@fcai.com', DATEADD(month, -2, GETDATE())),
+('Mahmoud', 'Samy', 'mahmoud@fcai.com', GETDATE());
+
+
+INSERT INTO PROGRAM (TITLE, CATEGORY_ID, INSTRUCTOR_ID, DIFFICULTY, FEE) VALUES 
+('web engineering', 1, 1, 'Hard', 500),      -- Software Engineering
+('Ethical Hacking', 2, 2, 'Expert', 700),    -- Cyber Security
+('Data Structures', 3, 3, 'Medium', 300),    -- CS
+('Database Systems', 4, 1, 'Medium', 400),   -- IT
+('Machine Learning', 5, 2, 'Hard', 800),   -- DS
+('Big Data Analytics', 4, 1, 'Hard', 750);   -- IT
+
+select * from UNITS
+
+INSERT INTO UNITS (PROGRAM_ID, SEQUENCE_NO, UNIT_TITLE , DURATION_MINS) VALUES 
+(1, 1, 'Creational Patterns' , 70),
+(2, 1, 'Network Security Basics' ,100 ),
+(3, 1, 'Linked Lists' , 65),
+(4, 1, 'SQL Fundamentals' , 35),
+(5, 1, 'Linear Regression' , 70);
+ 
+
+
+
+INSERT INTO ENROLLMENTS (STUDENT_ID, PROGRAM_ID, ENROLLED_AT, UNITS_COMPLETED) VALUES 
+(1, 5, GETDATE(), 1), 
+(2, 5, GETDATE(), 1);
+
+
+INSERT INTO ENROLLMENTS (STUDENT_ID, PROGRAM_ID, ENROLLED_AT, UNITS_COMPLETED) VALUES 
+(4, 2, DATEADD(day, -5, GETDATE()), 0);
+
+
+INSERT INTO ENROLLMENTS (STUDENT_ID, PROGRAM_ID, ENROLLED_AT, UNITS_COMPLETED) VALUES 
+(3, 4, DATEADD(month, -1, GETDATE()), 1);
+
+INSERT INTO CERTIFICATES (ENROLLMENT_ID ,  VERIFICATION_CODE) VALUES (1 , 'fIRST_CER_EVER');
+*/
+
+
+/* commands to check */
+
+/*
+--1 Most Popular Program
+SELECT TOP 1 P.TITLE, COUNT(E.ENROLLMENT_ID) AS TotalSignups
+FROM PROGRAM P
+LEFT JOIN ENROLLMENTS E ON P.PROGRAM_ID = E.PROGRAM_ID
+GROUP BY P.TITLE
+ORDER BY TotalSignups DESC;
+
+--2 Zero Signups
+SELECT TITLE 
+FROM PROGRAM P
+WHERE NOT EXISTS (
+    SELECT 1 FROM ENROLLMENTS E 
+    WHERE E.PROGRAM_ID = P.PROGRAM_ID 
+    AND E.ENROLLED_AT >= DATEADD(month, -1, GETDATE())
+);
+
+
+--3 Best Instructor
+SELECT TOP 1 I.INS_FIRST_NAME, I.INS_LAST_NAME, COUNT(E.ENROLLMENT_ID) AS SignupsCount
+FROM INSTRUCTORS I
+JOIN PROGRAM P ON I.INSTRUCTOR_ID = P.INSTRUCTOR_ID
+JOIN ENROLLMENTS E ON P.PROGRAM_ID = E.PROGRAM_ID
+WHERE E.ENROLLED_AT >= DATEADD(month, -1, GETDATE())
+GROUP BY I.INSTRUCTOR_ID, I.INS_FIRST_NAME, I.INS_LAST_NAME
+ORDER BY SignupsCount DESC;
+
+--4 Inactive Students
+SELECT S.ST_FIRST_NAME, S.ST_LAST_NAME, P.TITLE
+FROM STUDENT S
+JOIN ENROLLMENTS E ON S.STUDENT_ID = E.STUDENT_ID
+JOIN PROGRAM P ON E.PROGRAM_ID = P.PROGRAM_ID
+WHERE E.UNITS_COMPLETED = 0 
+AND E.ENROLLED_AT >= DATEADD(month, -1, GETDATE());
+
+
+--5 Active Programs by Category
+SELECT C.NAME AS CategoryName, P.TITLE AS ProgramTitle
+FROM CATEGORY C
+JOIN PROGRAM P ON C.CATEGORY_ID = P.CATEGORY_ID
+JOIN ENROLLMENTS E ON P.PROGRAM_ID = E.PROGRAM_ID
+WHERE E.ENROLLED_AT >= DATEADD(month, -1, GETDATE())
+GROUP BY C.NAME, P.TITLE;
+
+-- Student Credentials
+SELECT S.ST_EMAIL, COUNT(C.CERTIFICATE_ID) AS TotalCredentials
+FROM STUDENT S
+INNER JOIN ENROLLMENTS E ON E.STUDENT_ID = S.STUDENT_ID
+LEFT JOIN  CERTIFICATES C ON E.ENROLLMENT_ID = C.ENROLLMENT_ID
+GROUP BY S.STUDENT_ID, S.ST_EMAIL;
+/*
